@@ -1116,8 +1116,10 @@
             var option = $("<option>");
             option.attr("value", i);
             option.text(network.name);
-            if (network.name == "BTC - Bitcoin") {
+            if (network.name == "RVN - Ravencoin") {
                 option.prop("selected", true);
+                network = bitcoinjs.bitcoin.networks.ravencoin;
+                setHdCoin(175);
             }
             DOM.phraseNetwork.append(option);
         }
