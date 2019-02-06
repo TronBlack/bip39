@@ -262,13 +262,6 @@
             clearTimeout(phraseChangeTimeoutEvent);
         }
         phraseChangeTimeoutEvent = setTimeout(splitPhraseChanged, 400);
-
-        //delayedPhraseChanged();
-        //var fullPhrase = DOM.splitPhrase1.val().trim() + ' ' +  DOM.splitPhrase2.val().trim();
-        //DOM.phrase.val(fullPhrase);
-        //phraseChanged(true);
-
-        //alert(fullPhrase);
     }
 
     function phraseChanged(secure = false) {
