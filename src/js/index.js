@@ -1171,14 +1171,9 @@
                 network = networks[i];
                 setHdCoin(175);
                 network.onSelect();
-
-                //network = bitcoinjs.bitcoin.networks.ravencoin;
-                //networkChanged();
             }
             DOM.phraseNetwork.append(option);
         }
-        //$('#network-phrase option').filter(function () { return $(this).html() == "RVN - Ravencoin"; }).val();
-        //networkChanged();
     }
 
     function populateClientSelect() {
