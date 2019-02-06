@@ -24,6 +24,10 @@
 
     var DOM = {};
     DOM.privacyScreenToggle = $(".privacy-screen-toggle");
+    DOM.splitWordsToggle = $(".split-words-toggle");
+    DOM.splitPhrase = $('#splitphrase');
+    DOM.splitPhrase1 = $('#splitphrase1');
+    DOM.splitPhrase2 = $('#splitphrase2');
     DOM.network = $(".network");
     DOM.bip32Client = $("#bip32-client");
     DOM.phraseNetwork = $("#network-phrase");
@@ -120,12 +124,17 @@
     function init() {
         // Events
         DOM.privacyScreenToggle.on("change", privacyScreenToggled);
+        DOM.splitWordsToggle.on("change", splitWordsToggled);
         DOM.generatedStrength.on("change", generatedStrengthChanged);
         DOM.network.on("change", networkChanged);
         DOM.bip32Client.on("change", bip32ClientChanged);
         DOM.useEntropy.on("change", setEntropyVisibility);
         DOM.entropy.on("input", delayedEntropyChanged);
         DOM.entropyMnemonicLength.on("change", entropyChanged);
+        DOM.splitPhrase1.on("change", splitPhraseChanged)
+        DOM.splitPhrase2.on("change", splitPhraseChanged)
+        DOM.splitPhrase1.on("input", delayedSplitPhraseChanged)
+        DOM.splitPhrase2.on("input", delayedSplitPhraseChanged)
         DOM.phrase.on("input", delayedPhraseChanged);
         DOM.passphrase.on("input", delayedPhraseChanged);
         DOM.generate.on("click", generateClicked);
@@ -235,12 +244,40 @@
         phraseChangeTimeoutEvent = setTimeout(phraseChanged, 400);
     }
 
-    function phraseChanged() {
+    function splitPhraseChanged() {
+        var fullPhrase = DOM.splitPhrase1.val().trim() + ' ' +  DOM.splitPhrase2.val().trim();
+        DOM.phrase.val(fullPhrase);
+        phraseChanged(true);
+        //alert(fullPhrase)
+    }
+
+    function delayedSplitPhraseChanged() {
+        hideValidationError();
+        seed = null;
+        bip32RootKey = null;
+        bip32ExtendedKey = null;
+        clearAddressesList();
+        showPending();
+        if (phraseChangeTimeoutEvent != null) {
+            clearTimeout(phraseChangeTimeoutEvent);
+        }
+        phraseChangeTimeoutEvent = setTimeout(splitPhraseChanged, 400);
+
+        //delayedPhraseChanged();
+        //var fullPhrase = DOM.splitPhrase1.val().trim() + ' ' +  DOM.splitPhrase2.val().trim();
+        //DOM.phrase.val(fullPhrase);
+        //phraseChanged(true);
+
+        //alert(fullPhrase);
+    }
+
+    function phraseChanged(secure = false) {
         showPending();
         setMnemonicLanguage();
         // Get the mnemonic phrase
         var phrase = DOM.phrase.val();
-        var errorText = findPhraseErrors(phrase);
+        var errorText = findPhraseErrors(phrase, secure);
+
         if (errorText) {
             showValidationError(errorText);
             return;
@@ -460,6 +497,13 @@
         }
     }
 
+    function splitWordsToggled() {
+        // One way trap door from unchecked to checked
+        if (DOM.privacyScreenToggle.prop("checked")) {
+            DOM.splitPhrase.removeClass("hidden");
+        }        
+    }
+
     // Private methods
 
     function generateRandomPhrase() {
@@ -567,7 +611,7 @@
             .hide();
     }
 
-    function findPhraseErrors(phrase) {
+    function findPhraseErrors(phrase, secure=false) {
         // Preprocess the words
         phrase = mnemonic.normalizeString(phrase);
         var words = phraseToWordArray(phrase);
@@ -580,9 +624,15 @@
             var word = words[i];
             var language = getLanguage();
             if (WORDLISTS[language].indexOf(word) == -1) {
-                console.log("Finding closest match to " + word);
-                var nearestWord = findNearestWord(word);
-                return word + " not in wordlist, did you mean " + nearestWord + "?";
+                if (secure) {
+                    return('Word is not in the wordlist.')
+                }
+                else {
+
+                    console.log("Finding closest match to " + word);
+                    var nearestWord = findNearestWord(word);
+                    return word + " not in wordlist, did you mean " + nearestWord + "?";
+                }
             }
         }
         // Check the words are valid
@@ -1118,11 +1168,17 @@
             option.text(network.name);
             if (network.name == "RVN - Ravencoin") {
                 option.prop("selected", true);
-                network = bitcoinjs.bitcoin.networks.ravencoin;
+                network = networks[i];
                 setHdCoin(175);
+                network.onSelect();
+
+                //network = bitcoinjs.bitcoin.networks.ravencoin;
+                //networkChanged();
             }
             DOM.phraseNetwork.append(option);
         }
+        //$('#network-phrase option').filter(function () { return $(this).html() == "RVN - Ravencoin"; }).val();
+        //networkChanged();
     }
 
     function populateClientSelect() {
