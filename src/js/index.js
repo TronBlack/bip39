@@ -492,9 +492,11 @@
 
     function splitWordsToggled() {
         // One way trap door from unchecked to checked
-        if (DOM.privacyScreenToggle.prop("checked")) {
-            DOM.splitPhrase.removeClass("hidden");
-        }        
+
+        //Auto check privacy if split words gets checked.   
+        DOM.privacyScreenToggle.prop( "checked", true );
+        privacyScreenToggled();  
+        DOM.splitPhrase.removeClass("hidden");     
     }
 
     // Private methods
